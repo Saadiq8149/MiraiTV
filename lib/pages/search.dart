@@ -6,7 +6,9 @@ import 'package:mirai_tv/utils/types.dart';
 import 'package:mirai_tv/widgets/anime_card.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final AnilistAPI anilistApi;
+
+  const SearchPage({super.key, required this.anilistApi});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -14,7 +16,6 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
-  final AnilistAPI _api = AnilistAPI();
   List<Anime> _searchResults = [];
   bool _isLoading = false;
   Timer? _debounceTimer;
@@ -41,7 +42,7 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() => _isLoading = true);
     try {
-      final results = await _api.searchAnime(query);
+      final results = await widget.anilistApi.searchAnime(query);
       setState(() => _searchResults = results);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -141,7 +142,10 @@ class _SearchPageState extends State<SearchPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => AnimeDetailPage(animeId: anime.id),
+                builder: (_) => AnimeDetailPage(
+                  animeId: anime.id,
+                  anilistApi: widget.anilistApi,
+                ),
               ),
             );
           },

@@ -1,19 +1,41 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart' as acrylic;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mirai_tv/api/anilist.dart';
 import 'package:mirai_tv/pages/anime_details.dart';
 import 'package:mirai_tv/pages/home.dart';
-import 'package:mirai_tv/pages/profile.dart';
 import 'package:mirai_tv/pages/search.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  runApp(const MyApp());
+
+  // Initialize acrylic (Windows 11-style blur)
+  await acrylic.Window.initialize();
+  await acrylic.Window.setEffect(effect: acrylic.WindowEffect.mica, dark: true);
+
+  final prefs = await SharedPreferences.getInstance();
+  final anilistApi = AnilistAPI(prefs);
+
+  runApp(MyApp(anilistApi: anilistApi));
+
+  doWhenWindowReady(() {
+    const initialSize = Size(1200, 720);
+    appWindow.minSize = initialSize;
+    appWindow.size = initialSize;
+    appWindow.alignment = Alignment.center;
+    appWindow.title = "MiraiTV";
+    appWindow.show();
+  });
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.anilistApi});
+
+  final AnilistAPI anilistApi;
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +45,16 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
       ),
       themeMode: ThemeMode.dark,
-      home: const _MainScreen(),
+      home: _MainScreen(anilistApi: anilistApi),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class _MainScreen extends StatefulWidget {
-  const _MainScreen();
+  const _MainScreen({required this.anilistApi});
+
+  final AnilistAPI anilistApi;
 
   @override
   State<_MainScreen> createState() => _MainScreenState();
@@ -38,6 +62,11 @@ class _MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<_MainScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   final _navigatorKeys = [
     GlobalKey<NavigatorState>(),
@@ -70,9 +99,11 @@ class _MainScreenState extends State<_MainScreen> {
       child: Scaffold(
         body: Stack(
           children: [
-            _buildOffstageNavigator(0, const HomePage()),
-            _buildOffstageNavigator(1, const SearchPage()),
-            _buildOffstageNavigator(2, const ProfilePage()),
+            _buildOffstageNavigator(0, HomePage(anilistApi: widget.anilistApi)),
+            _buildOffstageNavigator(
+              1,
+              SearchPage(anilistApi: widget.anilistApi),
+            ),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -83,7 +114,6 @@ class _MainScreenState extends State<_MainScreen> {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
       ),
@@ -103,7 +133,10 @@ class _MainScreenState extends State<_MainScreen> {
           if (settings.name!.startsWith('/anime/')) {
             final animeId = settings.name!.replaceFirst('/anime/', '');
             return MaterialPageRoute(
-              builder: (_) => AnimeDetailPage(animeId: int.parse(animeId)),
+              builder: (_) => AnimeDetailPage(
+                animeId: int.parse(animeId),
+                anilistApi: widget.anilistApi,
+              ),
             );
           }
 

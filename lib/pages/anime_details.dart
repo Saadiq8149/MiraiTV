@@ -6,15 +6,19 @@ import 'package:mirai_tv/utils/types.dart';
 
 class AnimeDetailPage extends StatefulWidget {
   final int animeId;
+  final AnilistAPI anilistApi;
 
-  const AnimeDetailPage({super.key, required this.animeId});
+  const AnimeDetailPage({
+    super.key,
+    required this.animeId,
+    required this.anilistApi,
+  });
 
   @override
   State<AnimeDetailPage> createState() => _AnimeDetailPageState();
 }
 
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
-  final AnilistAPI _anilistApi = AnilistAPI();
   final AnicliAPI _anicliApi = AnicliAPI();
   Anime? _anime;
   String? _showId;
@@ -50,7 +54,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
 
   Future<void> _loadAnime() async {
     try {
-      final anime = await _anilistApi.getAnimeById(widget.animeId);
+      final anime = await widget.anilistApi.getAnimeById(widget.animeId);
 
       // Fetch show ID from AnicliAPI
       String? showId;
@@ -163,7 +167,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           // Cover Image
                           Container(
                             height: 180,
-                            width: 130,
+                            width: 200,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               image: anime.thumbnailUrl.isNotEmpty
@@ -181,10 +185,32 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           const SizedBox(height: 8),
                           // Play Button
                           SizedBox(
-                            width: 140,
+                            width: 200,
                             child: ElevatedButton(
                               onPressed: () {
-                                // TODO: Implement play functionality
+                                if (_showId != null) {
+                                  int episodeToPlay = anime.progress + 1;
+                                  if (episodeToPlay > anime.episodes) {
+                                    episodeToPlay = anime.episodes;
+                                  }
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => AnimeVideoPlayer(
+                                        animeId: anime.id,
+                                        showId: _showId!,
+                                        episodeNumber: episodeToPlay.toString(),
+                                        animeName: anime.title,
+                                        anilistAPI: widget.anilistApi,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Failed to load show ID'),
+                                    ),
+                                  );
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.redAccent,
@@ -194,18 +220,20 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                                 minimumSize: const Size.fromHeight(52),
                                 padding: EdgeInsets.zero,
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.play_arrow,
                                     color: Colors.white,
                                     size: 28,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Play',
-                                    style: TextStyle(
+                                    anime.progress == 0
+                                        ? 'Play'
+                                        : 'Continue Ep ${anime.progress + 1}',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -306,6 +334,43 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
               ],
             ),
             const SizedBox(height: 16),
+
+            // Watch Status Badges
+            if (anime.userStatus != 'None') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    // Status Badge
+                    _buildStatusBadge(anime.userStatus),
+                    const SizedBox(width: 12),
+                    // Progress Display
+                    if (anime.episodes > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withOpacity(0.2),
+                          border: Border.all(color: Colors.blueAccent),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          '${anime.progress}/${anime.episodes}',
+                          style: const TextStyle(
+                            color: Colors.blueAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             const SizedBox(height: 16),
 
             // Genres
@@ -468,16 +533,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
           itemCount: paginatedEpisodes.length,
           itemBuilder: (context, index) {
             final episodeNumber = paginatedEpisodes[index];
-            final episodeIndex = episodeNumber - 1;
-
-            // Check if episode data exists in episodesList
-            final hasEpisodeData =
-                _anime?.episodesList != null &&
-                episodeIndex < _anime!.episodesList.length;
-
-            final episode = hasEpisodeData
-                ? _anime!.episodesList[episodeIndex]
-                : null;
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -487,9 +542,11 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => AnimeVideoPlayer(
+                          animeId: anime.id,
                           showId: _showId!,
                           episodeNumber: episodeNumber.toString(),
                           animeName: anime.title,
+                          anilistAPI: widget.anilistApi,
                         ),
                       ),
                     );
@@ -516,33 +573,13 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           color: Colors.grey[800],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child:
-                            hasEpisodeData && episode!.thumbnailUrl.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  episode.thumbnailUrl,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Center(
-                                      child: Icon(
-                                        Icons.play_circle_outline,
-                                        color: Colors.grey[600],
-                                        size: 50,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                            : Center(
-                                child: Icon(
-                                  Icons.play_circle_outline,
-                                  color: Colors.grey[600],
-                                  size: 50,
-                                ),
-                              ),
+                        child: Center(
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            color: Colors.grey[600],
+                            size: 50,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 16),
                       // Episode Info
@@ -551,9 +588,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              hasEpisodeData && episode!.title.isNotEmpty
-                                  ? episode.title
-                                  : 'Episode $episodeNumber',
+                              'Episode $episodeNumber',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -638,6 +673,46 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    late Color badgeColor;
+    late String displayText;
+
+    switch (status) {
+      case 'CURRENT':
+        badgeColor = Colors.blueAccent;
+        displayText = 'Currently watching';
+        break;
+      case 'PLANNING':
+        badgeColor = Colors.purpleAccent;
+        displayText = 'Planning to watch';
+        break;
+      case 'COMPLETED':
+        badgeColor = Colors.greenAccent;
+        displayText = 'Finished watching';
+        break;
+      default:
+        badgeColor = Colors.grey;
+        displayText = status;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: badgeColor.withOpacity(0.2),
+        border: Border.all(color: badgeColor),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        displayText,
+        style: TextStyle(
+          color: badgeColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

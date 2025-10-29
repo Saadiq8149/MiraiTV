@@ -4,8 +4,14 @@ import 'package:mirai_tv/utils/types.dart';
 class AnimeCard extends StatelessWidget {
   final Anime anime;
   final VoidCallback? onTap;
+  final bool showProgress;
 
-  const AnimeCard({super.key, required this.anime, this.onTap});
+  const AnimeCard({
+    super.key,
+    required this.anime,
+    this.onTap,
+    this.showProgress = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +26,7 @@ class AnimeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 3,
+              flex: 2,
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -90,6 +96,7 @@ class AnimeCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Title
                     Text(
@@ -102,18 +109,44 @@ class AnimeCard extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    const Spacer(),
-                    // Year & Episodes
-                    Text(
-                      '${anime.year} • ${anime.episodes} eps',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
+                    if (!showProgress) const Spacer(),
+                    if (showProgress && anime.episodes > 0)
+                      const SizedBox(height: 8),
+                    if (!showProgress)
+                      // Year & Episodes
+                      Text(
+                        '${anime.year} • ${anime.episodes} eps',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    if (showProgress && anime.episodes > 0) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: anime.progress / anime.episodes,
+                          minHeight: 6,
+                          backgroundColor: Colors.grey[700],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            anime.progress >= anime.episodes
+                                ? Colors.green
+                                : Colors.redAccent,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${anime.progress}/${anime.episodes}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

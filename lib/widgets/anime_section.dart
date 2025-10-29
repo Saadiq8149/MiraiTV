@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:mirai_tv/pages/anime_details.dart';
 import 'package:mirai_tv/utils/types.dart';
 import 'package:mirai_tv/widgets/anime_card.dart';
+import 'package:mirai_tv/api/anilist.dart';
 import 'dart:ui';
 
 class AnimeSection extends StatelessWidget {
   final String title;
   final Future<List<Anime>> Function() fetchAnime;
+  final AnilistAPI anilistApi;
+  final bool showProgress;
 
   const AnimeSection({
     super.key,
     required this.title,
     required this.fetchAnime,
+    this.showProgress = false,
+    required this.anilistApi,
   });
 
   @override
@@ -83,13 +88,16 @@ class AnimeSection extends StatelessWidget {
                     return SizedBox(
                       width: 200,
                       child: AnimeCard(
+                        showProgress: showProgress,
                         anime: animeList[index],
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  AnimeDetailPage(animeId: animeList[index].id),
+                              builder: (context) => AnimeDetailPage(
+                                animeId: animeList[index].id,
+                                anilistApi: anilistApi,
+                              ),
                             ),
                           );
                         },

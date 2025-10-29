@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mirai_tv/api/anicli.dart';
+import 'package:mirai_tv/api/anilist.dart';
 
 class AnimeVideoPlayer extends StatefulWidget {
   final String showId;
   final String episodeNumber;
   final String animeName;
+  final int animeId;
+  final AnilistAPI anilistAPI;
 
   const AnimeVideoPlayer({
     super.key,
     required this.showId,
     required this.episodeNumber,
     required this.animeName,
+    required this.anilistAPI,
+    required this.animeId,
   });
 
   @override
@@ -30,6 +35,7 @@ class _AnimeVideoPlayerState extends State<AnimeVideoPlayer> {
   Map<String, String>? _currentSource;
   bool _loading = true;
   bool _isDisposed = false;
+  bool _progressUpdated = false;
 
   @override
   void initState() {
@@ -83,6 +89,23 @@ class _AnimeVideoPlayerState extends State<AnimeVideoPlayer> {
       }
     });
 
+    // Listen for playback position to update progress at 80%
+    _player!.stream.position.listen((position) {
+      if (_player != null && _player!.state.duration.inMilliseconds > 0) {
+        final progress =
+            (position.inMilliseconds / _player!.state.duration.inMilliseconds);
+
+        // Update progress when 80% is reached
+        if (progress >= 0.8 && !_progressUpdated) {
+          _progressUpdated = true;
+          widget.anilistAPI.updateAnimeProgress(
+            widget.animeId,
+            int.parse(widget.episodeNumber),
+          );
+        }
+      }
+    });
+
     // Load subtitles if available
     final subtitleUrl = source['subtitles'];
     if (subtitleUrl != null && subtitleUrl.isNotEmpty) {
@@ -95,7 +118,6 @@ class _AnimeVideoPlayerState extends State<AnimeVideoPlayer> {
       await _player?.setSubtitleTrack(
         SubtitleTrack.uri(subtitleUrl, title: 'English', language: 'en'),
       );
-      debugPrint('[DEBUG] Subtitles loaded: $subtitleUrl');
     } catch (e) {
       debugPrint('[DEBUG] Error loading subtitles: $e');
     }
@@ -121,14 +143,17 @@ class _AnimeVideoPlayerState extends State<AnimeVideoPlayer> {
   }
 
   void _nextEpisode() {
+    _progressUpdated = false;
     final nextEpisodeNum = int.parse(widget.episodeNumber) + 1;
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => AnimeVideoPlayer(
+            animeId: widget.animeId,
             showId: widget.showId,
             episodeNumber: nextEpisodeNum.toString(),
             animeName: widget.animeName,
+            anilistAPI: widget.anilistAPI,
           ),
         ),
       );

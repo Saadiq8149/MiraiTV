@@ -20,8 +20,10 @@ class Anime {
   String bannerUrl;
   String thumbnailUrl;
   String status;
+  String userStatus;
   double rating;
   int year;
+  int progress;
   List<Episode> episodesList;
 
   Anime({
@@ -36,6 +38,8 @@ class Anime {
     required this.status,
     required this.rating,
     required this.year,
+    this.userStatus = "None",
+    this.progress = 0,
     this.episodesList = const [],
   });
 }
