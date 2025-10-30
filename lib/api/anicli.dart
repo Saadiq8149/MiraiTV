@@ -8,7 +8,6 @@ class AnicliAPI {
   static const String allanimeBase = "allanime.day";
   static const String allanimeApi = "https://api.$allanimeBase";
 
-  /// Search for anime by query
   Future<List<Map<String, dynamic>>> searchAnime(String query) async {
     const searchGql = '''
       query(\$search: SearchInput \$limit: Int \$page: Int \$translationType: VaildTranslationTypeEnumType \$countryOrigin: VaildCountryOriginEnumType) {
@@ -55,7 +54,6 @@ class AnicliAPI {
     return [];
   }
 
-  /// Get anime by MAL ID
   Future<Map<String, dynamic>?> getAnimeByAnilistId(
     String anilistId,
     String title,
@@ -71,7 +69,6 @@ class AnicliAPI {
     return null;
   }
 
-  /// Get list of available episodes for an anime
   Future<List<String>> getEpisodesList(String showId) async {
     const episodesListGql = '''
       query (\$showId: String!) {
@@ -204,7 +201,6 @@ class AnicliAPI {
     return result.toString().replaceAll('/clock', '/clock.json');
   }
 
-  /// Get embed URLs for an episode
   Future<Map<String, String>> _getEmbedUrls(
     String showId,
     String episodeString,
@@ -256,7 +252,6 @@ class AnicliAPI {
     return {};
   }
 
-  /// Extract video links from provider
   Future<List<Map<String, String>>> _getLinks(String providerId) async {
     var decodedId = _decodeProviderId(providerId);
 
@@ -273,11 +268,9 @@ class AnicliAPI {
       final links = <Map<String, String>>[];
       final body = response.body;
 
-      // Parse JSON response
       try {
         final data = jsonDecode(body);
 
-        // Handle links array
         if (data['links'] != null && data['links'] is List) {
           final linksList = data['links'] as List;
 
@@ -296,7 +289,6 @@ class AnicliAPI {
               sourceType = 'webm';
             }
 
-            // Get subtitles if available
             String subtitles = '';
             if (link['subtitles'] != null && link['subtitles'] is List) {
               final subtitlesList = link['subtitles'] as List;
@@ -317,7 +309,6 @@ class AnicliAPI {
           }
         }
 
-        // Handle HLS links (if present at root level)
         if (data['hls'] != null && data['hls']['url'] != null) {
           links.add({
             'quality': 'hls',
@@ -336,20 +327,16 @@ class AnicliAPI {
     return [];
   }
 
-  /// Get video URL for a specific episode
-  /// Returns the best quality video URL
   Future<List<Map<String, String>>?> getEpisodeUrls(
     String showId,
     String episodeNumber,
   ) async {
-    // Get embed URLs
     final embedUrls = await _getEmbedUrls(showId, episodeNumber);
 
     if (embedUrls.isEmpty) {
       return null;
     }
 
-    // Try providers in order: Luf-Mp4 (hianime), Default (wixmp), Yt-mp4, S-mp4
     final providerOrder = ['Luf-Mp4', 'Default', 'Yt-mp4', 'S-mp4'];
     final allLinks = <Map<String, String>>[];
 
