@@ -298,24 +298,23 @@ class AnicliAPI {
               }
             }
 
+            Map<String, String> referrerHeaders = {};
+            if (link['headers'] != null) {
+              referrerHeaders['Referer'] = link['headers']['Referer'];
+              referrerHeaders['User-Agent'] = link['headers']['user-agent'];
+            }
+
             if (url != null && quality != null) {
               links.add({
                 'quality': quality,
                 'url': url,
                 'source': sourceType,
                 'subtitles': subtitles,
+                'referrer': referrerHeaders['Referer'] ?? allanimeRefr,
+                'user-agent': referrerHeaders['User-Agent'] ?? agent,
               });
             }
           }
-        }
-
-        if (data['hls'] != null && data['hls']['url'] != null) {
-          links.add({
-            'quality': 'hls',
-            'url': data['hls']['url'],
-            'source': 'hls',
-            'subtitles': '',
-          });
         }
       } catch (e) {
         print('[DEBUG] Failed to parse JSON: $e');
@@ -351,6 +350,8 @@ class AnicliAPI {
         }
       }
     }
+
+    print(allLinks);
 
     return allLinks;
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mirai_tv/api/anilist.dart';
 import 'package:mirai_tv/api/anicli.dart';
-import 'package:mirai_tv/pages/video_player.dart';
+import 'package:mirai_tv/widgets/inline_video_player.dart';
 import 'package:mirai_tv/utils/types.dart';
 
 class AnimeDetailPage extends StatefulWidget {
@@ -23,6 +23,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   Anime? _anime;
   String? _showId;
   bool _isLoading = true;
+  int? _selectedEpisode;
 
   // Pagination and search
   final TextEditingController _searchController = TextEditingController();
@@ -66,9 +67,20 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
         showId = result?['id'] as String?;
       }
 
+      int? episodeNumber = 1;
+
+      print(anime?.status);
+
+      if (anime?.progress == anime?.episodes && anime?.status != 'RELEASING') {
+        episodeNumber = 1;
+      } else {
+        episodeNumber = anime?.progress;
+      }
+
       setState(() {
         _anime = anime;
         _showId = showId;
+        _selectedEpisode = episodeNumber;
         _isLoading = false;
       });
     } catch (e) {
@@ -181,65 +193,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                             child: anime.thumbnailUrl.isEmpty
                                 ? const Icon(Icons.image, color: Colors.grey)
                                 : null,
-                          ),
-                          const SizedBox(height: 8),
-                          // Play Button
-                          SizedBox(
-                            width: 140,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                if (_showId != null) {
-                                  int episodeToPlay = anime.progress + 1;
-                                  if (episodeToPlay > anime.episodes) {
-                                    episodeToPlay = anime.episodes;
-                                  }
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => AnimeVideoPlayer(
-                                        animeId: anime.id,
-                                        showId: _showId!,
-                                        episodeNumber: episodeToPlay.toString(),
-                                        animeName: anime.title,
-                                        anilistAPI: widget.anilistApi,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Failed to load show ID'),
-                                    ),
-                                  );
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                minimumSize: const Size.fromHeight(52),
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.play_arrow,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    anime.progress == 0 ? 'Play' : 'Continue',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -421,6 +374,29 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             ],
             const SizedBox(height: 32),
 
+            // Inline Video Player with padding
+            if (_showId != null && _selectedEpisode != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 80),
+                child: InlineVideoPlayer(
+                  key: ValueKey<int>(_selectedEpisode!),
+                  showId: _showId!,
+                  episodeNumber: _selectedEpisode.toString(),
+                  animeName: anime.title,
+                  animeId: anime.id,
+                  anilistAPI: widget.anilistApi,
+                  onNextEpisode: () {
+                    if (_selectedEpisode! < anime.episodes) {
+                      setState(() {
+                        _selectedEpisode = _selectedEpisode! + 1;
+                      });
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
             // Episode List
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -520,29 +496,21 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: InkWell(
                 onTap: () {
-                  if (_showId != null) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => AnimeVideoPlayer(
-                          animeId: anime.id,
-                          showId: _showId!,
-                          episodeNumber: episodeNumber.toString(),
-                          animeName: anime.title,
-                          anilistAPI: widget.anilistApi,
-                        ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Failed to load show ID')),
-                    );
-                  }
+                  setState(() {
+                    _selectedEpisode = episodeNumber;
+                  });
+                  _scrollToTop();
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[900],
+                    color: _selectedEpisode == episodeNumber
+                        ? Colors.redAccent.withOpacity(0.2)
+                        : Colors.grey[900],
+                    border: _selectedEpisode == episodeNumber
+                        ? Border.all(color: Colors.redAccent, width: 2)
+                        : null,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -557,8 +525,12 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                         ),
                         child: Center(
                           child: Icon(
-                            Icons.play_circle_outline,
-                            color: Colors.grey[600],
+                            _selectedEpisode == episodeNumber
+                                ? Icons.play_circle_filled
+                                : Icons.play_circle_outline,
+                            color: _selectedEpisode == episodeNumber
+                                ? Colors.redAccent
+                                : Colors.grey[600],
                             size: 50,
                           ),
                         ),
