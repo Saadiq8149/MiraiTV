@@ -65,7 +65,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(16, 40.0, 16, 16),
       child: Column(
         children: [
           // Search TextField

@@ -167,7 +167,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           // Cover Image
                           Container(
                             height: 180,
-                            width: 200,
+                            width: 140,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               image: anime.thumbnailUrl.isNotEmpty
@@ -185,7 +185,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           const SizedBox(height: 8),
                           // Play Button
                           SizedBox(
-                            width: 200,
+                            width: 140,
                             child: ElevatedButton(
                               onPressed: () {
                                 if (_showId != null) {
@@ -230,9 +230,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    anime.progress == 0
-                                        ? 'Play'
-                                        : 'Continue Ep ${anime.progress + 1}',
+                                    anime.progress == 0 ? 'Play' : 'Continue',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -305,24 +303,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                                   ],
                                 ),
                                 const SizedBox(width: 16),
+
                                 // Episodes
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.subscriptions,
-                                      color: Colors.redAccent,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${anime.episodes}',
-                                      style: TextStyle(
-                                        color: Colors.grey[300],
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ],
                             ),
                           ],

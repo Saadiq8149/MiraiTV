@@ -1,6 +1,7 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as acrylic;
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mirai_tv/api/anilist.dart';
 import 'package:mirai_tv/pages/anime_details.dart';
@@ -13,23 +14,27 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
-  // Initialize acrylic (Windows 11-style blur)
-  await acrylic.Window.initialize();
-  await acrylic.Window.setEffect(effect: acrylic.WindowEffect.mica, dark: true);
+  // Initialize acrylic (Windows 11-style blur) - Windows only
+  if (Platform.isWindows) {
+    await acrylic.Window.initialize();
+    await acrylic.Window.setEffect(
+      effect: acrylic.WindowEffect.mica,
+      dark: true,
+    );
+    doWhenWindowReady(() {
+      const initialSize = Size(1200, 720);
+      appWindow.minSize = initialSize;
+      appWindow.size = initialSize;
+      appWindow.alignment = Alignment.center;
+      appWindow.title = "MiraiTV";
+      appWindow.show();
+    });
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final anilistApi = AnilistAPI(prefs);
 
   runApp(MyApp(anilistApi: anilistApi));
-
-  doWhenWindowReady(() {
-    const initialSize = Size(1200, 720);
-    appWindow.minSize = initialSize;
-    appWindow.size = initialSize;
-    appWindow.alignment = Alignment.center;
-    appWindow.title = "MiraiTV";
-    appWindow.show();
-  });
 }
 
 class MyApp extends StatelessWidget {
@@ -43,6 +48,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(textTheme: GoogleFonts.interTextTheme()),
       darkTheme: ThemeData.dark().copyWith(
         textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF0D0D0D),
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
       themeMode: ThemeMode.dark,
       home: _MainScreen(anilistApi: anilistApi),
@@ -108,7 +118,9 @@ class _MainScreenState extends State<_MainScreen> {
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color(0xFF0D0D0D),
           selectedItemColor: Colors.redAccent,
+          unselectedItemColor: Colors.grey[600],
           currentIndex: _currentIndex,
           onTap: _onTabSelected,
           items: const [
