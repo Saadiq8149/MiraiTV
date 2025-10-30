@@ -3,7 +3,7 @@
 
 A modern crossplatform anime streaming app built with Flutter.
 
-[![MiraiTV Logo](https://raw.githubusercontent.com/Saadiq8149/MiraiTV/1.0.0/assets/logo.png)](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/assets/logo.png)
+![Logo](assets/logo.png)
 
 ##  Acknowledgements
 
@@ -12,10 +12,13 @@ A modern crossplatform anime streaming app built with Flutter.
 
 ## Screenshots
 
-![Home Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/home.png)
-![Search Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/search.png)
-![Anime Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/anime.png)
-![Episodes Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/episodes.png)
+<div style="display: flex; overflow-x: auto; gap: 10px; padding: 10px;">
+  <img src="screenshots/home.png" alt="Home Screenshot" width="400">
+  <img src="screenshots/search.png" alt="Search Screenshot" width="400">
+  <img src="screenshots/anime.png" alt="Anime Screenshot" width="400">
+  <img src="screenshots/episodes.png" alt="Episodes Screenshot" width="400">
+</div>
+
 ##  Features
 
 *  **True Cross-Platform Support:** Built with Flutter to provide a seamless and native experience on **Android, iOS, Windows, macOS, and Linux** from a single codebase.
