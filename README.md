@@ -1,122 +1,55 @@
+
 # MiraiTV
 
-![MiraiTV Logo](https://github.com/Saadiq8149/MiraiTV/blob/master/assets/logo.png)
+A modern crossplatform anime streaming app built with Flutter.
 
-A modern, cross-platform anime streaming application built with **Flutter**. Stream anime, sync with AniList, and track your progress automatically.
+[![MiraiTV Logo](https://raw.githubusercontent.com/Saadiq8149/MiraiTV/1.0.0/assets/logo.png)](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/assets/logo.png)
 
-## ✨ Features
+##  Acknowledgements
 
-- **Stream Anime** - High-quality playback with integrated sources
-- **AniList Integration** - Sync your watchlist and track progress automatically
-- **Continue Watching** - Resume from where you left off
-- **Auto-Progress Sync** - Progress updates to AniList at 80% completion
-- **Dark Theme** - Beautiful UI with Windows 11 acrylic effects (Windows only)
-- **Cross-Platform** - Works on Windows, macOS, Linux, Android, and iOS
-- **Pull-to-Refresh** - Reload content with a simple swipe
-- **Watch Status Badges** - Track Current, Planning, and Completed anime
 
-## 🛠️ Tech Stack
+* **[ani-cli](https://github.com/pystardust/ani-cli)**: For the heavy inspiration and foundational concept of a simple, effective anime streaming tool.
 
-- **Flutter** & **Dart** - Cross-platform framework
-- **AniList GraphQL API** - Anime database & user sync
-- **media_kit** - Video playback
-- **OAuth 2.0** - Secure authentication
-- **SharedPreferences** - Local storage
+## Screenshots
 
-## 🚀 Quick Start
+![Home Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/home.png)
+![Search Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/search.png)
+![Anime Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/anime.png)
+![Episodes Screenshot](https://github.com/Saadiq8149/MiraiTV/blob/1.0.0/screenshots/episodes.png)
+##  Features
 
-### Prerequisites
-- Flutter SDK (latest stable)
-- Dart 3.0+
+*  **True Cross-Platform Support:** Built with Flutter to provide a seamless and native experience on **Android, iOS, Windows, macOS, and Linux** from a single codebase.
 
-### Installation
+*  **Seamless AniList Integration:** Connect your AniList account to automatically sync your watch progress, lists, and ratings in real-time.
 
-```bash
-git clone https://github.com/Saadiq8149/MiraiTV.git
-cd MiraiTV
-flutter pub get
-flutter run
-```
+* **Powerful Search & Discovery:** Find new shows, browse currently trending anime, and search the entire AniList catalog with ease.
+## Roadmap
 
-### Configure AniList API
+- Adding filtering and forting to search
+- Video player screen improvements
+- Video resuming from last played timestamp
+- Auto skipping intro and outro
+- Save to watchlist feature
 
-1. Create an app at [AniList Developer Settings](https://anilist.co/settings/developer)
-2. Update `lib/api/anilist.dart`:
-   ```dart
-   const String _clientId = 'YOUR_CLIENT_ID';
-   const String _redirectUri = 'YOUR_REDIRECT_URI';
-   ```
+##  Contributing
 
-## 📱 Platform Support
+Contributions are always welcome! We value community input and pull requests.
 
-| Platform | Status |
-|----------|--------|
-| Windows | ✅ Full (with Acrylic UI) |
-| macOS | ✅ Full |
-| Linux | ✅ Full |
-| Android | ✅ Full |
-| iOS | ✅ Full |
+Please read our contribution guidelines before getting started:
 
-## 🎯 Usage
+* See **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed instructions on how to set up your environment and ways to get started.
 
-1. **Login** - Click "Login with AniList" and authorize
-2. **Browse** - Explore Trending, Top Rated, and Latest anime
-3. **Watch** - Select anime and start streaming
-4. **Track** - Progress syncs automatically to AniList
+### Ways to Contribute
 
-## 📊 Project Structure
+* Look through the [**open issues**](https://github.com/Saadiq8149/MiraiTV/issues) to find something to work on.
+* Found a bug? [**Open a new issue**](https://github.com/Saadiq8149/MiraiTV/issues/new/choose) and use the bug report template.
+* Have a feature idea? [**Open a feature request**](https://github.com/Saadiq8149/MiraiTV/issues/new/choose) to discuss it.
+## License
 
-```
-lib/
-├── api/anilist.dart          # AniList API integration
-├── pages/                    # Home, Search, Details, Player
-├── widgets/                  # Anime cards, sections, auth
-├── utils/types.dart          # Data models
-└── main.dart                 # Entry point
-```
+[MIT](https://choosealicense.com/licenses/mit/)
 
-## 🔐 Authentication
 
-MiraiTV uses **OAuth 2.0** for secure AniList login:
-- Tokens stored locally via SharedPreferences
-- No passwords stored
-- All communications HTTPS encrypted
+## Authors
 
-## 🐛 Troubleshooting
+- [@octokatherine](https://www.github.com/Saadiq8149)
 
-**Login not working?**
-- Verify Client ID and Redirect URI
-- Check AniList developer settings
-
-**Video not playing?**
-- Check internet connection
-- Ensure media_kit is initialized
-
-**Progress not syncing?**
-- Confirm you're logged in
-- Watch at least 80% of episode
-
-## 📚 Inspiration
-
-This project is inspired by [ani-cli](https://github.com/pystardust/ani-cli) - a command-line anime streaming tool. MiraiTV brings a similar experience to desktop and mobile with a modern GUI and AniList integration.
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## ⚠️ Legal Notice
-
-MiraiTV is for personal use only. Users are responsible for ensuring they have the right to watch anime from integrated sources.
-
-## 🤝 Contributing
-
-Contributions welcome! Fork, create a feature branch, commit, and open a PR.
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/Saadiq8149/MiraiTV/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Saadiq8149/MiraiTV/discussions)
-
----
-
-**Made with ❤️ for anime enthusiasts**
