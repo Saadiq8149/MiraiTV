@@ -11,10 +11,13 @@ A modern crossplatform anime streaming app built with Flutter.
 * **[ani-cli](https://github.com/pystardust/ani-cli)**: For the heavy inspiration and foundational concept of a simple, effective anime streaming tool.
 
 ## Screenshots
-
+- Home
 ![Home Screenshot](screenshots/home.png)
+- Search
 ![Search Screenshot](screenshots/search.png)
+- Anime
 ![Anime Screenshot](screenshots/anime.png)
+- Anime Episodes
 ![Episodes Screenshot](screenshots/episodes.png)
 ##  Features
 
