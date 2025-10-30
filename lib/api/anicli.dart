@@ -351,8 +351,6 @@ class AnicliAPI {
       }
     }
 
-    print(allLinks);
-
     return allLinks;
   }
 }

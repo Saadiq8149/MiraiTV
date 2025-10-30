@@ -117,9 +117,6 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
             widget.animeId,
             int.parse(widget.episodeNumber),
           );
-          debugPrint(
-            '[DEBUG] Updated progress for anime ${widget.animeId} to episode ${widget.episodeNumber}',
-          );
         }
       }
     });
@@ -136,7 +133,6 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
       await _player?.setSubtitleTrack(
         SubtitleTrack.uri(subtitleUrl, title: 'English', language: 'en'),
       );
-      debugPrint('[DEBUG] Subtitles loaded: $subtitleUrl');
     } catch (e) {
       debugPrint('[DEBUG] Error loading subtitles: $e');
     }

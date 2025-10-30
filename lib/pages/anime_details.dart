@@ -69,12 +69,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
 
       int? episodeNumber = 1;
 
-      print(anime?.status);
-
       if (anime?.progress == anime?.episodes && anime?.status != 'RELEASING') {
         episodeNumber = 1;
       } else {
-        episodeNumber = anime?.progress;
+        episodeNumber = anime?.progress == 0 ? 1 : anime?.progress;
       }
 
       setState(() {
@@ -377,7 +375,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             // Inline Video Player with padding
             if (_showId != null && _selectedEpisode != null) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 80),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: InlineVideoPlayer(
                   key: ValueKey<int>(_selectedEpisode!),
                   showId: _showId!,
