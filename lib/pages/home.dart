@@ -214,6 +214,7 @@ class _HomePageState extends State<HomePage> {
                               AnimeSection(
                                 title: 'Continue Watching',
                                 showProgress: true,
+                                showResumePosition: true,
                                 fetchAnime: () =>
                                     widget.anilistApi.getUserWatchlist(),
                                 anilistApi: widget.anilistApi,
@@ -222,6 +223,19 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        child: AnimeSection(
+                          title: 'Planning',
+                          fetchAnime: () =>
+                              widget.anilistApi.getUserPlanningList(),
+                          anilistApi: widget.anilistApi,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,

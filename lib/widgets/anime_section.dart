@@ -10,12 +10,14 @@ class AnimeSection extends StatelessWidget {
   final Future<List<Anime>> Function() fetchAnime;
   final AnilistAPI anilistApi;
   final bool showProgress;
+  final bool showResumePosition;
 
   const AnimeSection({
     super.key,
     required this.title,
     required this.fetchAnime,
     this.showProgress = false,
+    this.showResumePosition = false,
     required this.anilistApi,
   });
 
@@ -87,18 +89,28 @@ class AnimeSection extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return SizedBox(
                       width: 200,
-                      child: AnimeCard(
-                        showProgress: showProgress,
-                        anime: animeList[index],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AnimeDetailPage(
-                                animeId: animeList[index].id,
-                                anilistApi: anilistApi,
-                              ),
-                            ),
+                      child: FutureBuilder<String?>(
+                        future: showResumePosition
+                            ? anilistApi.getFormattedWatchPosition(
+                                animeList[index].id,
+                              )
+                            : Future.value(null),
+                        builder: (context, resumeSnapshot) {
+                          return AnimeCard(
+                            showProgress: showProgress,
+                            anime: animeList[index],
+                            resumePosition: resumeSnapshot.data,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AnimeDetailPage(
+                                    animeId: animeList[index].id,
+                                    anilistApi: anilistApi,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),

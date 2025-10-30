@@ -5,12 +5,14 @@ class AnimeCard extends StatelessWidget {
   final Anime anime;
   final VoidCallback? onTap;
   final bool showProgress;
+  final String? resumePosition;
 
   const AnimeCard({
     super.key,
     required this.anime,
     this.onTap,
     this.showProgress = false,
+    this.resumePosition,
   });
 
   @override
@@ -112,7 +114,8 @@ class AnimeCard extends StatelessWidget {
                     if (!showProgress) const Spacer(),
                     if (showProgress && anime.episodes > 0)
                       const SizedBox(height: 8),
-                    if (!showProgress)
+
+                    if (!showProgress && resumePosition == null)
                       // Year & Episodes
                       Text(
                         '${anime.year} • ${anime.episodes} eps',
@@ -139,11 +142,28 @@ class AnimeCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${anime.progress}/${anime.episodes}',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.white70,
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            resumePosition != null
+                                ? TextSpan(
+                                    text: '${resumePosition}   ',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.redAccent,
+                                    ),
+                                  )
+                                : const TextSpan(),
+                            TextSpan(
+                              text: '${anime.progress} / ${anime.episodes} eps',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

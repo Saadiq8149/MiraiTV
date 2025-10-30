@@ -146,6 +146,25 @@ class AnilistAPI {
     }
   }
 
+  Future<void> updateAnimeStatus(int animeId, String status) async {
+    const String mutation = """
+      mutation (\$animeId: Int!, \$status: MediaListStatus!) {
+        SaveMediaListEntry(mediaId: \$animeId, status: \$status) {
+          id
+          status
+        }
+      }
+    """;
+
+    Map<String, dynamic> variables = {'animeId': animeId, 'status': status};
+
+    final response = await _queryAnilist(mutation, variables);
+
+    if (response == null) {
+      throw Exception('Failed to update anime status');
+    }
+  }
+
   Future<Anime?> getAnimeById(int id) async {
     const String query = """
       query (\$id: Int!) {
@@ -508,5 +527,131 @@ class AnilistAPI {
       }
       return animeList;
     }
+  }
+
+  Future<List<Anime>> getUserPlanningList() async {
+    const String userQuery = """
+      query {
+        Viewer {
+          id
+          name
+        }
+      }
+    """;
+
+    final response = await _queryAnilist(userQuery, {});
+
+    if (response == null) {
+      return [];
+    } else {
+      int userId = response['data']['Viewer']['id'];
+
+      const String planningListQuery = """
+        query (\$userId: Int!) {
+          MediaListCollection(userId: \$userId, type: ANIME, status: PLANNING) {
+            lists {
+              entries {
+                progress
+                media {
+                  id
+                  title {
+                    romaji
+                    english
+                  }
+                  idMal
+                  status
+                  episodes
+                  description
+                  averageScore
+                  genres
+                  bannerImage
+                  seasonYear
+                  coverImage {
+                    extraLarge
+                  }
+                  nextAiringEpisode {
+                    episode
+                  }
+                }
+              }
+            }
+          }
+        }
+      """;
+
+      Map<String, dynamic> variables = {'userId': userId};
+      final planningListResponse = await _queryAnilist(
+        planningListQuery,
+        variables,
+      );
+
+      if (planningListResponse == null) {
+        return [];
+      } else {
+        List<dynamic> entries =
+            planningListResponse['data']['MediaListCollection']['lists'][0]['entries'];
+        List<Anime> planningList = [];
+        for (var entry in entries) {
+          int episodes;
+
+          if (entry['media']['status'] == 'RELEASING' &&
+              entry['media']['nextAiringEpisode'] != null) {
+            episodes = entry['media']['nextAiringEpisode']['episode'] - 1;
+          } else {
+            episodes = entry['media']['episodes'] ?? 1;
+          }
+
+          Anime anime = Anime(
+            id: entry['media']['id'],
+            title:
+                entry['media']['title']['english'] ??
+                entry['media']['title']['romaji'],
+            malId: entry['media']['idMal'] ?? 0,
+            status: entry['media']['status'] ?? 'UNKNOWN',
+            episodes: episodes,
+            description: entry['media']['description'] ?? '',
+            rating: (entry['media']['averageScore'] ?? 0.0).toDouble(),
+            genres: List<String>.from(entry['media']['genres']),
+            bannerUrl: entry['media']['bannerImage'] ?? '',
+            thumbnailUrl: entry['media']['coverImage']['extraLarge'] ?? '',
+            year: entry['media']['seasonYear'] ?? 0,
+          );
+          planningList.add(anime);
+        }
+        return planningList.reversed.toList();
+      }
+    }
+  }
+
+  /// Get the saved watch timestamp for a specific anime episode
+  /// Returns Duration of the saved position, or null if no timestamp exists
+  Future<Duration?> getWatchTimestamp(int animeId) async {
+    final key = 'watch_timestamp_$animeId';
+    final savedMs = prefs.getInt(key);
+    return savedMs != null ? Duration(milliseconds: savedMs) : null;
+  }
+
+  /// Get the last watched timestamp (epoch milliseconds) for an anime
+  /// Useful for sorting continue watching by most recently watched
+  Future<int?> getLastWatchedTime(int animeId) async {
+    final key = 'last_watched_$animeId';
+    return prefs.getInt(key);
+  }
+
+  /// Format a Duration into MM:SS format
+  /// Example: Duration(minutes: 34, seconds: 22) -> "34:22"
+  static String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String minutes = twoDigits(duration.inMinutes);
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+
+  /// Get formatted watch position string for display
+  /// Example: "34:22" or null if no saved timestamp
+  Future<String?> getFormattedWatchPosition(int animeId) async {
+    final duration = await getWatchTimestamp(animeId);
+
+    return duration != null ? formatDuration(duration) : null;
   }
 }

@@ -341,6 +341,44 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
               const SizedBox(height: 16),
             ],
 
+            // Add to Watchlist Button (only show if not in list)
+            if (anime.userStatus == 'None') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      widget.anilistApi.updateAnimeStatus(
+                        widget.animeId,
+                        'PLANNING',
+                      );
+                      setState(() {
+                        anime.userStatus = 'PLANNING';
+                      });
+                    },
+                    icon: const Icon(Icons.add, size: 20),
+                    label: const Text(
+                      'Add to Watchlist',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // Description
             if (anime.description.isNotEmpty) ...[
               const Padding(
@@ -380,8 +418,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   key: ValueKey<int>(_selectedEpisode!),
                   showId: _showId!,
                   episodeNumber: _selectedEpisode.toString(),
-                  animeName: anime.title,
-                  animeId: anime.id,
+                  anime: anime,
                   anilistAPI: widget.anilistApi,
                   onNextEpisode: () {
                     if (_selectedEpisode! < anime.episodes) {
@@ -644,6 +681,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
       case 'COMPLETED':
         badgeColor = Colors.greenAccent;
         displayText = 'Finished watching';
+        break;
+      case 'REPEATING':
+        badgeColor = Colors.orangeAccent;
+        displayText = 'Re-watching';
         break;
       default:
         badgeColor = Colors.grey;
