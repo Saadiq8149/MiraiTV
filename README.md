@@ -29,10 +29,7 @@ A modern crossplatform anime streaming app built with Flutter.
 ## Roadmap
 
 - Adding filtering and forting to search
-- Video player screen improvements
-- Video resuming from last played timestamp
 - Auto skipping intro and outro
-- Save to watchlist feature
 
 ##  Contributing
 
