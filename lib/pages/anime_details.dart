@@ -349,9 +349,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      widget.anilistApi.updateAnimeStatus(
+                      widget.anilistApi.updateAnime(
                         widget.animeId,
                         'PLANNING',
+                        0,
                       );
                       setState(() {
                         anime.userStatus = 'PLANNING';

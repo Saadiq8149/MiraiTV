@@ -162,18 +162,25 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
           _progressUpdated = true;
 
           if (widget.anime.userStatus == "COMPLETED") {
-            widget.anilistAPI.updateAnimeStatus(widget.anime.id, "REPEATING");
+            widget.anilistAPI.updateAnime(
+              widget.anime.id,
+              "REPEATING",
+              int.parse(widget.episodeNumber),
+            );
           } else if (widget.anime.userStatus == "PLANNING") {
-            widget.anilistAPI.updateAnimeStatus(widget.anime.id, "CURRENT");
+            widget.anilistAPI.updateAnime(
+              widget.anime.id,
+              "CURRENT",
+              int.parse(widget.episodeNumber),
+            );
           } else if (widget.anime.userStatus == "CURRENT" &&
               widget.episodeNumber == widget.anime.episodes.toString()) {
-            widget.anilistAPI.updateAnimeStatus(widget.anime.id, "COMPLETED");
+            widget.anilistAPI.updateAnime(
+              widget.anime.id,
+              "COMPLETED",
+              int.parse(widget.episodeNumber),
+            );
           }
-
-          widget.anilistAPI.updateAnimeProgress(
-            widget.anime.id,
-            int.parse(widget.episodeNumber),
-          );
 
           await _clearTimestamp();
         }

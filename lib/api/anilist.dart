@@ -127,10 +127,10 @@ class AnilistAPI {
     }
   }
 
-  Future<void> updateAnimeProgress(int animeId, int progress) async {
+  Future<void> updateAnime(int animeId, String status, int progress) async {
     const String mutation = """
-      mutation (\$animeId: Int!, \$progress: Int!) {
-        SaveMediaListEntry(mediaId: \$animeId, progress: \$progress) {
+      mutation (\$animeId: Int!, \$progress: Int!, \$status: MediaListStatus!) {
+        SaveMediaListEntry(mediaId: \$animeId, progress: \$progress, status: \$status) {
           id
           progress
         }
@@ -143,25 +143,6 @@ class AnilistAPI {
 
     if (response == null) {
       throw Exception('Failed to update anime progress');
-    }
-  }
-
-  Future<void> updateAnimeStatus(int animeId, String status) async {
-    const String mutation = """
-      mutation (\$animeId: Int!, \$status: MediaListStatus!) {
-        SaveMediaListEntry(mediaId: \$animeId, status: \$status) {
-          id
-          status
-        }
-      }
-    """;
-
-    Map<String, dynamic> variables = {'animeId': animeId, 'status': status};
-
-    final response = await _queryAnilist(mutation, variables);
-
-    if (response == null) {
-      throw Exception('Failed to update anime status');
     }
   }
 
@@ -244,94 +225,98 @@ class AnilistAPI {
 
   Future<List<Anime>> getUserWatchlist() async {
     const String userQuery = """
-      query {
-        Viewer {
-          id
-          name
-        }
+    query {
+      Viewer {
+        id
+        name
       }
-    """;
+    }
+  """;
 
     final response = await _queryAnilist(userQuery, {});
 
     if (response == null) {
       return [];
-    } else {
-      int userId = response['data']['Viewer']['id'];
+    }
 
-      const String watchlistQuery = """
-        query (\$userId: Int!) {
-          MediaListCollection(userId: \$userId, type: ANIME, status: CURRENT) {
-            lists {
-              entries {
-                progress
-                media {
-                  id
-                  title {
-                    romaji
-                    english
-                  }
-                  idMal
-                  status
-                  episodes
-                  description
-                  averageScore
-                  genres
-                  bannerImage
-                  seasonYear
-                  coverImage {
-                    extraLarge
-                  }
-                  nextAiringEpisode {
-                    episode
-                  }
-                }
-              }
+    int userId = response['data']['Viewer']['id'];
+
+    const String watchlistQuery = """
+    query (\$userId: Int!) {
+      Page(perPage: 100) {
+        mediaList(
+          userId: \$userId,
+          type: ANIME,
+          status_in: [CURRENT, REPEATING]
+        ) {
+          progress
+          media {
+            id
+            title {
+              romaji
+              english
+            }
+            idMal
+            status
+            episodes
+            description
+            averageScore
+            genres
+            bannerImage
+            seasonYear
+            coverImage {
+              extraLarge
+            }
+            nextAiringEpisode {
+              episode
             }
           }
         }
-      """;
-
-      Map<String, dynamic> variables = {'userId': userId};
-      final watchlistResponse = await _queryAnilist(watchlistQuery, variables);
-
-      if (watchlistResponse == null) {
-        return [];
-      } else {
-        List<dynamic> entries =
-            watchlistResponse['data']['MediaListCollection']['lists'][0]['entries'];
-        List<Anime> watchlist = [];
-        for (var entry in entries) {
-          int episodes;
-
-          if (entry['media']['status'] == 'RELEASING' &&
-              entry['media']['nextAiringEpisode'] != null) {
-            episodes = entry['media']['nextAiringEpisode']['episode'] - 1;
-          } else {
-            episodes = entry['media']['episodes'] ?? 1;
-          }
-
-          Anime anime = Anime(
-            id: entry['media']['id'],
-            title:
-                entry['media']['title']['english'] ??
-                entry['media']['title']['romaji'],
-            malId: entry['media']['idMal'] ?? 0,
-            status: entry['media']['status'] ?? 'UNKNOWN',
-            episodes: episodes,
-            description: entry['media']['description'] ?? '',
-            rating: (entry['media']['averageScore'] ?? 0.0).toDouble(),
-            genres: List<String>.from(entry['media']['genres']),
-            bannerUrl: entry['media']['bannerImage'] ?? '',
-            thumbnailUrl: entry['media']['coverImage']['extraLarge'] ?? '',
-            year: entry['media']['seasonYear'] ?? 0,
-            progress: entry['progress'] ?? 0,
-          );
-          watchlist.add(anime);
-        }
-        return watchlist;
       }
     }
+  """;
+
+    Map<String, dynamic> variables = {'userId': userId};
+    final watchlistResponse = await _queryAnilist(watchlistQuery, variables);
+
+    if (watchlistResponse == null) {
+      return [];
+    }
+
+    List<dynamic> entries = watchlistResponse['data']['Page']['mediaList'];
+    List<Anime> watchlist = [];
+
+    for (var entry in entries) {
+      int episodes;
+
+      if (entry['media']['status'] == 'RELEASING' &&
+          entry['media']['nextAiringEpisode'] != null) {
+        episodes = entry['media']['nextAiringEpisode']['episode'] - 1;
+      } else {
+        episodes = entry['media']['episodes'] ?? 1;
+      }
+
+      Anime anime = Anime(
+        id: entry['media']['id'],
+        title:
+            entry['media']['title']['english'] ??
+            entry['media']['title']['romaji'],
+        malId: entry['media']['idMal'] ?? 0,
+        status: entry['media']['status'] ?? 'UNKNOWN',
+        episodes: episodes,
+        description: entry['media']['description'] ?? '',
+        rating: (entry['media']['averageScore'] ?? 0.0).toDouble(),
+        genres: List<String>.from(entry['media']['genres']),
+        bannerUrl: entry['media']['bannerImage'] ?? '',
+        thumbnailUrl: entry['media']['coverImage']['extraLarge'] ?? '',
+        year: entry['media']['seasonYear'] ?? 0,
+        progress: entry['progress'] ?? 0,
+      );
+
+      watchlist.add(anime);
+    }
+
+    return watchlist;
   }
 
   Future<List<Anime>> getTrendingAnime() async {
