@@ -12,13 +12,10 @@ A modern crossplatform anime streaming app built with Flutter.
 
 ## Screenshots
 
-<div style="display: flex; overflow-x: auto; gap: 10px; padding: 10px;">
-  <img src="screenshots/home.png" alt="Home Screenshot" width="400">
-  <img src="screenshots/search.png" alt="Search Screenshot" width="400">
-  <img src="screenshots/anime.png" alt="Anime Screenshot" width="400">
-  <img src="screenshots/episodes.png" alt="Episodes Screenshot" width="400">
-</div>
-
+![Home Screenshot](screenshots/home.png)
+![Search Screenshot](screenshots/search.png)
+![Anime Screenshot](screenshots/anime.png)
+![Episodes Screenshot](screenshots/episodes.png)
 ##  Features
 
 *  **True Cross-Platform Support:** Built with Flutter to provide a seamless and native experience on **Android, iOS, Windows, macOS, and Linux** from a single codebase.
