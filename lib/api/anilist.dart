@@ -137,7 +137,11 @@ class AnilistAPI {
       }
     """;
 
-    Map<String, dynamic> variables = {'animeId': animeId, 'progress': progress};
+    Map<String, dynamic> variables = {
+      'animeId': animeId,
+      'progress': progress,
+      'status': status,
+    };
 
     final response = await _queryAnilist(mutation, variables);
 

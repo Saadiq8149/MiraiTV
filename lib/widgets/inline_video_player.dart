@@ -174,10 +174,17 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
               int.parse(widget.episodeNumber),
             );
           } else if (widget.anime.userStatus == "CURRENT" &&
-              widget.episodeNumber == widget.anime.episodes.toString()) {
+              widget.episodeNumber == widget.anime.episodes.toString() &&
+              widget.anime.status != "RELEASING") {
             widget.anilistAPI.updateAnime(
               widget.anime.id,
               "COMPLETED",
+              int.parse(widget.episodeNumber),
+            );
+          } else {
+            widget.anilistAPI.updateAnime(
+              widget.anime.id,
+              widget.anime.userStatus,
               int.parse(widget.episodeNumber),
             );
           }

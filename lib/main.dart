@@ -8,6 +8,7 @@ import 'package:mirai_tv/pages/anime_details.dart';
 import 'package:mirai_tv/pages/home.dart';
 import 'package:mirai_tv/pages/search.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
