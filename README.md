@@ -51,5 +51,5 @@ Please read our contribution guidelines before getting started:
 
 ## Authors
 
-- [@octokatherine](https://www.github.com/Saadiq8149)
+- [@Saadiq8149](https://www.github.com/Saadiq8149)
 
